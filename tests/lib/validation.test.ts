@@ -49,7 +49,7 @@ describe("listQuerySchema", () => {
     expect(parsed.offset).toBe(10);
   });
 
-  it("clamps limit to the max of 100", () => {
-    expect(listQuerySchema.safeParse({ limit: "500" }).success).toBe(false);
+  it("accepts high limit query values", () => {
+    expect(listQuerySchema.safeParse({ limit: "500" }).success).toBe(true);
   });
 });

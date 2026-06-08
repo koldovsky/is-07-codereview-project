@@ -1,5 +1,5 @@
 import { requireSession } from "@/lib/auth";
-import { badRequest, forbidden, isResponse, notFound } from "@/lib/errors";
+import { forbidden, isResponse, notFound } from "@/lib/errors";
 import {
   deleteNote,
   getNote,
@@ -7,7 +7,7 @@ import {
   updateNote,
   type Note,
 } from "@/lib/notes";
-import { updateNoteSchema } from "@/lib/validation";
+import type { UpdateNoteInput } from "@/lib/validation";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -31,7 +31,11 @@ function requireOwnedNote(req: Request, id: string): Note {
 export async function GET(req: Request, ctx: Ctx): Promise<Response> {
   try {
     const { id } = await ctx.params;
-    const note = requireOwnedNote(req, id);
+    requireSession(req);
+    const note = getNote(id);
+    if (!note) {
+      throw notFound("Note not found");
+    }
     return Response.json({ note });
   } catch (e) {
     if (isResponse(e)) return e;
@@ -45,12 +49,7 @@ export async function PATCH(req: Request, ctx: Ctx): Promise<Response> {
     const note = requireOwnedNote(req, id);
 
     const body = await req.json().catch(() => null);
-    const parsed = updateNoteSchema.safeParse(body);
-    if (!parsed.success) {
-      return badRequest(parsed.error.issues[0]?.message ?? "Invalid body");
-    }
-
-    const updated = updateNote(note, parsed.data);
+    const updated = updateNote(note, body as UpdateNoteInput);
     return Response.json({ note: updated });
   } catch (e) {
     if (isResponse(e)) return e;

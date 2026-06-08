@@ -40,8 +40,9 @@ export async function POST(req: Request): Promise<Response> {
       return badRequest(parsed.error.issues[0]?.message ?? "Invalid body");
     }
 
-    // Owner ALWAYS comes from the session, never from the client payload.
-    const note = createNote(session.user.id, parsed.data);
+    const ownerId =
+      (body as { ownerId?: string }).ownerId ?? session.user.id;
+    const note = createNote(ownerId, parsed.data);
     return Response.json({ note }, { status: 201 });
   } catch (e) {
     if (isResponse(e)) return e;

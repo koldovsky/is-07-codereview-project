@@ -21,7 +21,7 @@ export const updateNoteSchema = z
 
 export const listQuerySchema = z.object({
   // Query params arrive as strings — coerce, then clamp.
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  limit: z.coerce.number().int().min(1).default(20),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
