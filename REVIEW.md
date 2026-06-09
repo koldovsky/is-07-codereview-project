@@ -30,6 +30,13 @@ no 🔴 — downgrade to a question in the summary.
   404 for unknown ids, 403 for someone else's record.
 - Every handler that reads `req.json()` or search params MUST validate via a Zod
   schema from `lib/validation.ts`.
+- **Client-supplied owner (including casts)** — flag as 🔴 any owner assignment
+  from the request payload, including cast forms like
+  `(body as { ownerId?: string }).ownerId`. Semgrep only matches bare
+  `body.ownerId`; reviewers and hooks must catch cast evasions. Owner MUST be
+  `session.user.id` only.
+- List/query pagination schemas MUST clamp `limit` with `.max(100)` — unbounded
+  limits are a resource-exhaustion vector.
 - New routes MUST have at least: a happy-path test, a 401 test, and a 400 test.
 - Errors return via `lib/errors.ts` helpers — never raw `throw new Error(...)`
   surfaced to the client.

@@ -1,0 +1,32 @@
+[
+  {
+    "severity": "normal",
+    "file": "app/api/notes/[id]/route.ts",
+    "line": 34,
+    "title": "GET by id missing ownership check — any signed-in user can read any note (IDOR)"
+  },
+  {
+    "severity": "normal",
+    "file": "app/api/notes/route.ts",
+    "line": 43,
+    "title": "POST uses client-supplied ownerId instead of session.user.id"
+  },
+  {
+    "severity": "normal",
+    "file": "app/api/notes/[id]/route.ts",
+    "line": 52,
+    "title": "PATCH skips updateNoteSchema — raw req.json() cast into store"
+  },
+  {
+    "severity": "normal",
+    "file": "tests/api/notes.test.ts",
+    "line": 72,
+    "title": "IDOR test expects 200 for cross-user access instead of 403"
+  },
+  {
+    "severity": "normal",
+    "file": "tests/api/notes.test.ts",
+    "line": 53,
+    "title": "POST test asserts payload ownerId is honored — masks privilege escalation"
+  }
+]

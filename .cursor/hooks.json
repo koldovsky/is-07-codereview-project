@@ -4,6 +4,9 @@
     "afterFileEdit": [
       {
         "command": "node scripts/hooks/lint-changed.mjs"
+      },
+      {
+        "command": "node scripts/hooks/guard-client-owner.mjs"
       }
     ],
     "beforeShellExecution": [

@@ -1,0 +1,38 @@
+[
+  {
+    "severity": "normal",
+    "file": "app/api/notes/[id]/route.ts",
+    "line": 34,
+    "title": "Broken access control: requireOwnedNote bypassed on GET — isOwner never called"
+  },
+  {
+    "severity": "normal",
+    "file": "app/api/notes/route.ts",
+    "line": 44,
+    "title": "Owner taken from request body — must come from session only"
+  },
+  {
+    "severity": "normal",
+    "file": "app/api/notes/[id]/route.ts",
+    "line": 52,
+    "title": "Unvalidated PATCH body reaches updateNote without Zod safeParse"
+  },
+  {
+    "severity": "normal",
+    "file": "lib/validation.ts",
+    "line": 24,
+    "title": "listQuerySchema limit has no max(100) — unbounded page size / DoS vector"
+  },
+  {
+    "severity": "normal",
+    "file": "tests/lib/validation.test.ts",
+    "line": 53,
+    "title": "Test changed to accept limit 500 — tuned to pass instead of fixing schema"
+  },
+  {
+    "severity": "normal",
+    "file": "tests/api/notes.test.ts",
+    "line": 53,
+    "title": "Create test expects attacker-supplied ownerId — wrong fix pattern"
+  }
+]

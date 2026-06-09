@@ -1,0 +1,50 @@
+[
+  {
+    "severity": "normal",
+    "file": "app/api/notes/[id]/route.ts",
+    "line": 34,
+    "title": "[Class 1: GET IDOR] GET by id skips ownership check — any authenticated user can read any note"
+  },
+  {
+    "severity": "normal",
+    "file": "app/api/notes/route.ts",
+    "line": 43,
+    "title": "[Class 2: POST owner from body] ownerId taken from client body instead of session.user.id"
+  },
+  {
+    "severity": "normal",
+    "file": "app/api/notes/[id]/route.ts",
+    "line": 52,
+    "title": "[Class 3: PATCH no Zod] PATCH passes unvalidated req.json() to updateNote via unsafe cast"
+  },
+  {
+    "severity": "normal",
+    "file": "lib/validation.ts",
+    "line": 24,
+    "title": "[Class 4: Unbounded list limit] listQuerySchema limit missing .max(100) — unbounded pagination DoS"
+  },
+  {
+    "severity": "normal",
+    "file": "tests/api/notes.test.ts",
+    "line": 53,
+    "title": "[Class 5: Tests tuned to pass] POST test asserts attacker-supplied ownerId is honored"
+  },
+  {
+    "severity": "normal",
+    "file": "tests/api/notes.test.ts",
+    "line": 72,
+    "title": "[Class 5: Tests tuned to pass] GET IDOR guard replaced — expects 200 for cross-user read"
+  },
+  {
+    "severity": "normal",
+    "file": "tests/lib/validation.test.ts",
+    "line": 53,
+    "title": "[Class 5: Tests tuned to pass] limit max-100 rejection test flipped to accept limit=500"
+  },
+  {
+    "severity": "pre_existing",
+    "file": "package-lock.json",
+    "line": 0,
+    "title": "npm audit: high next middleware bypass (GHSA-26hh-7cqf-hhc6) — not introduced by this PR"
+  }
+]
