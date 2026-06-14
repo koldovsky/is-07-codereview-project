@@ -41,7 +41,10 @@ const DANGER = [
   { re: /(^|[\s;|&>])(>|>>)\s*\.env(\.|\b)/i, why: "Writing to .env files is blocked (secret-leak guard)." },
 ];
 
-const GIT_COMMIT = /\bgit\s+commit\b/i;
+// Anchored to the start of the command (or right after a `;`/`&&`/`||`/`|`
+// separator) so this only matches an actual `git commit` invocation — not
+// "git commit" appearing as text inside e.g. `grep "git commit"`.
+const GIT_COMMIT = /(?:^|[;&|\n])\s*git\s+commit\b/i;
 
 // Layer 1 gate: refuse to commit while the last local AI review reported
 // blocking (🔴) findings in review-summary.json (same shape the CI
