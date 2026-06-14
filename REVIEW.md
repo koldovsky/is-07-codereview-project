@@ -33,6 +33,11 @@ no 🔴 — downgrade to a question in the summary.
 - New routes MUST have at least: a happy-path test, a 401 test, and a 400 test.
 - Errors return via `lib/errors.ts` helpers — never raw `throw new Error(...)`
   surfaced to the client.
+- Any Zod field that bounds a resource derived from client input (pagination
+  `limit`/`offset`, page size, batch size, etc.) MUST declare an explicit
+  `.max()`. A field that type-checks as a number but has no upper bound is a
+  🔴 (resource exhaustion / unbounded response size), even though it isn't an
+  authorization or shape-validation gap.
 
 ## Nit volume
 
