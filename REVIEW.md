@@ -13,6 +13,8 @@
   - Unvalidated request input reaching the store (no Zod `safeParse`/`parse`).
   - A leaked secret, or a real stack trace / internal message returned to the client.
   - A test changed to pass instead of a fixed bug.
+  - Resource exhaustion from a client-controlled numeric field with no upper
+    bound (e.g. a pagination `limit`/`offset`/batch size missing `.max()`).
 - 🟡 **Nit (non-blocking)** — style, naming, micro-perf, comments.
 - 🟣 **Pre-existing** — already on `main`; flag separately, do not block this PR.
 
@@ -33,6 +35,11 @@ no 🔴 — downgrade to a question in the summary.
 - New routes MUST have at least: a happy-path test, a 401 test, and a 400 test.
 - Errors return via `lib/errors.ts` helpers — never raw `throw new Error(...)`
   surfaced to the client.
+- Any Zod field that bounds a resource derived from client input (pagination
+  `limit`/`offset`, page size, batch size, etc.) MUST declare an explicit
+  `.max()`. A field that type-checks as a number but has no upper bound is a
+  🔴 (resource exhaustion / unbounded response size), even though it isn't an
+  authorization or shape-validation gap.
 
 ## Nit volume
 

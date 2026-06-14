@@ -1,0 +1,10 @@
+[
+  {"severity":"normal","file":"app/api/notes/[id]/route.ts","line":31,"title":"GET handler bypasses ownership check (requireOwnedNote/isOwner), allowing IDOR read of any user's note"},
+  {"severity":"normal","file":"app/api/notes/route.ts","line":43,"title":"POST takes ownerId from client body instead of session.user.id, allowing notes to be created under another user's id"},
+  {"severity":"normal","file":"app/api/notes/[id]/route.ts","line":52,"title":"PATCH skips updateNoteSchema.safeParse and casts raw body to UpdateNoteInput, allowing unvalidated/null input into updateNote"},
+  {"severity":"normal","file":"lib/validation.ts","line":24,"title":"listQuerySchema.limit lost its .max(100) clamp, allowing unbounded list size (resource exhaustion)"},
+  {"severity":"normal","file":"tests/api/notes.test.ts","line":53,"title":"POST ownerId test flipped to assert the attacker-supplied ownerId is honored, masking the IDOR-write bug"},
+  {"severity":"normal","file":"tests/api/notes.test.ts","line":72,"title":"GET IDOR guard test flipped from expecting 403 to 200, masking the IDOR-read bug"},
+  {"severity":"normal","file":"tests/lib/validation.test.ts","line":53,"title":"limit clamp test flipped to assert limit=500 is accepted, masking the removed .max(100) regression"},
+  {"severity":"nit","file":"app/api/notes/[id]/route.ts","line":2,"title":"updateNoteSchema import replaced with a type-only import, leaving PATCH's validation import misleading/dead"}
+]

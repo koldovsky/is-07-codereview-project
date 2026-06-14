@@ -10,11 +10,14 @@
  *   - exit code 2  → block the command
  *   - also emit Cursor's deny JSON on stdout (ignored by Claude on exit 2)
  *
- * Denied: `rm -rf`, force-push, push to a protected branch, writes to `.env`.
+ * Denied: `rm -rf`, force-push, push to a protected branch, writes to `.env`,
+ * and — new — `git commit` while `review-summary.json` reports blocking (🔴)
+ * findings (`normal > 0`). This turns the Layer 3 AI-review gate into a
+ * pre-commit guard, using the same artifact the CI `review-gate` job reads.
  * Everything else is allowed (fail-open: on parse error we allow + exit 0).
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 function readStdin() {
   try {
@@ -38,6 +41,33 @@ const DANGER = [
   { re: /(^|[\s;|&>])(>|>>)\s*\.env(\.|\b)/i, why: "Writing to .env files is blocked (secret-leak guard)." },
 ];
 
+// Anchored to the start of the command (or right after a `;`/`&&`/`||`/`|`
+// separator) so this only matches an actual `git commit` invocation — not
+// "git commit" appearing as text inside e.g. `grep "git commit"`.
+const GIT_COMMIT = /(?:^|[;&|\n])\s*git\s+commit\b/i;
+
+// Layer 1 gate: refuse to commit while the last local AI review reported
+// blocking (🔴) findings in review-summary.json (same shape the CI
+// `review-gate` job consumes). Missing/unreadable file → fail open.
+function reviewGateHit(command) {
+  if (!GIT_COMMIT.test(command)) return null;
+  if (!existsSync("review-summary.json")) return null;
+
+  let summary;
+  try {
+    summary = JSON.parse(readFileSync("review-summary.json", "utf8"));
+  } catch {
+    return null;
+  }
+
+  const blocking = Number(summary?.normal) || 0;
+  if (blocking <= 0) return null;
+
+  return {
+    why: `Commit blocked: review-summary.json reports ${blocking} blocking (🔴) finding(s). Resolve them or delete review-summary.json before committing.`,
+  };
+}
+
 function main() {
   const raw = readStdin();
   let payload;
@@ -50,7 +80,7 @@ function main() {
   const command = String(extractCommand(payload) || "");
   if (!command) process.exit(0);
 
-  const hit = DANGER.find((d) => d.re.test(command));
+  const hit = DANGER.find((d) => d.re.test(command)) ?? reviewGateHit(command);
   if (!hit) process.exit(0);
 
   // Cursor-format deny (used when exit code is 0; harmless on exit 2).
