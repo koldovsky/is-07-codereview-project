@@ -10,7 +10,8 @@
  *   - exit code 2  → block the command
  *   - also emit Cursor's deny JSON on stdout (ignored by Claude on exit 2)
  *
- * Denied: `rm -rf`, force-push, push to a protected branch, writes to `.env`.
+ * Denied: `rm -rf`, PowerShell recursive force delete, force-push, push to a
+ * protected branch, writes to `.env`.
  * Everything else is allowed (fail-open: on parse error we allow + exit 0).
  */
 
@@ -32,6 +33,7 @@ function extractCommand(payload) {
 
 const DANGER = [
   { re: /\brm\s+-[a-z]*r[a-z]*f|\brm\s+-[a-z]*f[a-z]*r/i, why: "Recursive force delete (rm -rf) is blocked." },
+  { re: /\bRemove-Item\b[\s\S]*(\s-Recurse\b|\s-r\b)[\s\S]*(\s-Force\b|\s-f\b)/i, why: "Recursive force delete (Remove-Item -Recurse -Force) is blocked." },
   { re: /git\s+push\s+.*(--force\b|-f\b|--force-with-lease)/i, why: "Force-push is blocked. Open a PR instead." },
   { re: /git\s+push\s+\S+\s+(HEAD:)?(main|master)\b/i, why: "Direct push to main/master is blocked. Open a PR." },
   { re: /git\s+push(\s+origin)?(\s+(main|master))?\s*$/i, why: "Push to the default branch is blocked. Open a PR." },

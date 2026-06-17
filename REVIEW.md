@@ -30,6 +30,10 @@ no 🔴 — downgrade to a question in the summary.
   404 for unknown ids, 403 for someone else's record.
 - Every handler that reads `req.json()` or search params MUST validate via a Zod
   schema from `lib/validation.ts`.
+- Tests in auth-sensitive routes MUST preserve the security invariant from
+  `main`: cross-user access is 403, client `ownerId` is ignored, and list limits
+  stay capped. Why: a test that asserts insecure behavior makes green CI a false
+  signal and must block merge.
 - New routes MUST have at least: a happy-path test, a 401 test, and a 400 test.
 - Errors return via `lib/errors.ts` helpers — never raw `throw new Error(...)`
   surfaced to the client.
