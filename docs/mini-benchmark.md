@@ -1,40 +1,24 @@
-# Your mini-benchmark (don't trust vendor numbers)
+# Mini Benchmark
 
-There is no SWE-bench for code review — every vendor wins its own benchmark.
-The only number you can trust is one you measured on **your** code.
+Target: `exercise/seeded-bugs` vs `main`.
 
-## How to run it
+Layer 2 evidence: `npm run lint` passed. `npx semgrep --config semgrep.yml` and `npx --yes semgrep --config semgrep.yml` both failed with `npm error could not determine executable to run`, so Semgrep produced no runtime findings in this environment. Based on `semgrep.yml`, the `client-supplied-owner` regex would not match `(body as { ownerId?: string }).ownerId` because the configured pattern looks for direct `.ownerId` on names such as `body.ownerId`.
 
-1. Review PR #1 (`exercise/seeded-bugs` → `main`). Find the bugs yourself first.
-2. Run each layer against that PR (L2 → L3 → L4, optionally L5).
-3. For each bug you found, mark whether each layer **caught** it (✅) or **missed** it (❌).
-4. Fill the table below. Keep it honest — a miss is the most useful cell.
+Layer 3 evidence: two local passes were consolidated with `npm run review:consolidate`, producing 7 normal findings.
 
-## Bugs you found (list before the table)
+Layer 4 evidence: simulated PR bot review caught the security, logic, maintainability, and coverage issues listed in `docs/layer4-review.md`.
 
-<!-- Example: 1) GET /api/notes/[id] — any session can read any note (IDOR) -->
+| Bug | Layer 2 | Layer 3 | Layer 4 |
+|------|----------|----------|----------|
+| POST trusts payload `ownerId` (`app/api/notes/route.ts:43-45`) | Missed | Caught | Caught |
+| GET by id skips ownership check (`app/api/notes/[id]/route.ts:34-39`) | Missed | Caught | Caught |
+| PATCH bypasses Zod validation (`app/api/notes/[id]/route.ts:51-52`) | Missed | Caught | Caught |
+| List limit cap removed (`lib/validation.ts:24`) | Missed | Caught | Caught |
+| Tests assert payload owner control (`tests/api/notes.test.ts:43-53`) | Missed | Caught | Caught |
+| Tests assert cross-user reads (`tests/api/notes.test.ts:57-72`) | Missed | Caught | Caught |
+| Tests assert unbounded limit (`tests/lib/validation.test.ts:52-53`) | Missed | Caught | Caught |
+| PATCH invalid-body route coverage missing (`tests/api/notes.test.ts:1-116`) | Missed | Caught | Caught |
 
-## Coverage table (fill in)
+## Conclusion
 
-| # | Bug (your description) | Class | L2 ESLint/Semgrep | L3 local AI | L4 PR bot | L5 ultra/BugBot | Human |
-|---|---|---|---|---|---|---|---|
-| 1 | | | | | | | |
-| 2 | | | | | | | |
-| 3 | | | | | | | |
-| 4 | | | | | | | |
-| 5 | | | | | | | |
-
-## What to expect (from the research)
-
-- **Layer 2** catches recognizable patterns, **misses authorization logic**.
-- **Authorization / IDOR is found poorly** by every layer (kasra.blog: best model
-  7/10 on Broken Access Control, OWASP #1). The human row should be the strongest
-  on auth bugs.
-- AI layers are **non-deterministic** — run twice; results differ.
-
-## Reflection (answer in your PR)
-
-- Which layer gave the best **signal-to-noise** for your bug set?
-- Which bug did every automated layer miss, and **why** (what context was needed)?
-- Which **metric** would you track to know review is working
-  (precision / acceptance / escaped defects / time-to-merge)?
+Layer 3 had the best signal-to-noise ratio for this branch: it found the main authorization and validation issues and connected them to changed tests. Layer 4 produced similar findings with stronger PR-comment framing. Layer 2 had the lowest signal here: ESLint passed, Semgrep did not run in this environment, and the configured Semgrep owner rule was too narrow for the cast-based owner access pattern. Layer 2 also produced the most operational noise because Semgrep failed before scanning.
